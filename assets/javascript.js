@@ -1,19 +1,15 @@
 var apiKey ="ff328c709f930f3f5d34f579f4cc3b87"
 
-// search function
-
-// localstorage
-
-// createRow for history and searchTrem
 
 
 // api to get weather data
 async function getWeather(city) {
   var response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=ff328c709f930f3f5d34f579f4cc3b87`);
   console.log(response);
+  
   return response;}
 
-// units=metric
+
 // api to get weather forecast
 async function getForecast(city) {
   var response =await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=ff328c709f930f3f5d34f579f4cc3b87&units=imperial`);
@@ -56,30 +52,70 @@ function updateForecast(data) {
     var humidity = day.main.humidity;
     var iconCode = day.weather[0].icon;
     var iconUrl = `https://openweathermap.org/img/w/${iconCode}.png`;
-    return `<div class="col-sm-2 forecast-day">
+    var windSpeed= day.wind.speed
+    return `<div class="col-sm-3 forecast-day">
               <h6>${date}</h6>
               <img src="${iconUrl}" alt="${day.weather[0].description}" />
-              <div>${temperature} °C</div>
-              <div>${humidity}%</div>
+              <div>Temp:${temperature} °C</div>
+              <div>Humidity:${humidity}%</div>
+              <div>Windspeed:${windSpeed}</div>
             </div>`;})
-            console.log(forecastHtml);
-            $("#forecast").append(forecastHtml)
+            $("#forecast").empty().append(forecastHtml)
   });
-
-  // Update the HTML element with the forecast data
-  
+  // Update the HTML element with the forecast data  
 }
-// event listener
-$("#search-button").click(function() {
-  var searchTrem = $("#search-value").val();
-  console.log(searchTrem);
-  store_in_localstorage(searchTrem)
-  updateWeather(getWeather(searchTrem))
-  updateForecast(getForecast(searchTrem))
 
+// createRow for history and searchTrem
+function createRow(searchTerm) {
+  var listItem = $("<li>").addClass("list-group-item").text(searchTerm);
+  $(".history").append(listItem);
 }
-)
 
+
+// localstorage
 function store_in_localstorage() {
+  var searchTerm = $("#search-value").val();
+  var history = JSON.parse(localStorage.getItem("history")) || [];
+  if (history.indexOf(searchTerm) === -1) {
+    history.push(searchTerm);
+    localStorage.setItem("history", JSON.stringify(history));
+  }
+  
+  $("#forecast").empty();
+
+  if (history.length > 0) {
+    updateWeather(getWeather(history[history.length - 1]));
+    updateForecast(getForecast(history[history.length - 1]));
+  }
 
 }
+// history would show up when page is loaded
+function loadSearchHistory() {
+  var history = JSON.parse(localStorage.getItem("history")) || [];
+  $(".history").empty();
+  for (var i = 0; i < history.length; i++) {
+    createRow(history[i]);
+  }
+}
+
+// event listener
+$(document).ready(function() {
+  loadSearchHistory();
+  
+
+
+  $("#search-button").click(function() {
+    var searchTrem = $("#search-value").val();
+    
+    
+    store_in_localstorage(searchTrem)
+    updateWeather(getWeather(searchTrem))
+    updateForecast(getForecast(searchTrem))
+
+  }
+  )
+  $(".history").on("click", "li", function () {
+      updateWeather(getWeather(($(this).text())));
+      updateForecast(getForecast(($(this).text())));
+    });
+    })
