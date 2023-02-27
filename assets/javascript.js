@@ -53,7 +53,7 @@ function updateForecast(data) {
     var iconCode = day.weather[0].icon;
     var iconUrl = `https://openweathermap.org/img/w/${iconCode}.png`;
     var windSpeed= day.wind.speed
-    return `<div class="col-sm-3 forecast-day">
+    return `<div class="col-sm-3 forecast-day  mr-4 mt-2 p-2 border border-success">
               <h6>${date}</h6>
               <img src="${iconUrl}" alt="${day.weather[0].description}" />
               <div>Temp:${temperature} °C</div>
